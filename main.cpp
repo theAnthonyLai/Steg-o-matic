@@ -2,6 +2,7 @@
 
 #include "provided.h"
 #include <iostream>
+#include "HashTable.h"  //  TO_DO testing compilation errors
 using namespace std;
 
 int main()
