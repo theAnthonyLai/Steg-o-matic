@@ -45,6 +45,8 @@ private:
         //  if key is found in the HashTable, return true with ptr pointing to the Node
         //  otherwise, return false with ptr points to the last Node in the linked list
     
+    void updateRecentList(Node* ptrToUpdate);
+    
     Node* m_buckets;    //  dynamically allocated array
     unsigned int m_nBuckets;
     unsigned int m_nCapacity;
@@ -123,25 +125,7 @@ bool HashTable<KeyType, ValueType>::set(const KeyType& key, const ValueType& val
         keyPtr->value = value;
         if (!keyPtr->isPermanent) {
             //  not permanent, must be moved to the most recently-written list
-            if (m_mostRecent != keyPtr) {
-                //  more that one non-permanent Node in the recenlty-written list
-                //  and this Node is not already the most recent one
-                m_mostRecent->orderNext = keyPtr;
-                
-                if (keyPtr->orderPrev != nullptr) {
-                    //  && keyPtr->orderNext != nullptr (should not need to check this)
-                    //  this Node is somewhere in the middle of the recently-written list
-                    keyPtr->orderPrev->orderNext = keyPtr->orderNext;
-                    keyPtr->orderNext->orderPrev = keyPtr->orderPrev;
-                } else {
-                    // this Node is the first one (least recent one)
-                    m_leastRecent = keyPtr->orderNext;
-                    m_leastRecent->orderPrev = nullptr;
-                }
-                
-                keyPtr->orderPrev = m_mostRecent;
-                m_mostRecent = keyPtr;
-            }
+            updateRecentList(keyPtr);
         }
     }
     return true;
@@ -160,6 +144,18 @@ bool HashTable<KeyType, ValueType>::get(const KeyType& key, ValueType& value) co
     }
 }
 
+
+template <typename KeyType, typename ValueType>
+bool HashTable<KeyType, ValueType>::touch(const KeyType& key)
+{
+    Node* keyPtr;
+    if (!getNodePtr(key, keyPtr) || keyPtr->isPermanent)
+        //  key not in the HashTable or key is permanent
+        return false;
+    
+    updateRecentList(keyPtr);
+    return true;
+}
 
 //  private member/helper function
 template <typename KeyType, typename ValueType>
@@ -182,12 +178,34 @@ bool HashTable<KeyType, ValueType>::getNodePtr(const KeyType& key, Node*& ptr) c
             return true;
         if (ptr->next == nullptr)
             //  this is the end of the linked list
+            //  Node not found
             return false;
         else
             ptr = ptr->next;
     }
 }
-
+template <typename KeyType, typename ValueType>
+void HashTable<KeyType, ValueType>::updateRecentList(Node* ptrToUpdate) {
+    if (m_mostRecent != ptrToUpdate) {
+        //  more that one non-permanent Node in the recenlty-written list
+        //  and this Node is not already the most recent one
+        m_mostRecent->orderNext = ptrToUpdate;
+        
+        if (ptrToUpdate->orderPrev != nullptr) {
+            //  && ptrToUpdate->orderNext != nullptr (should not need to check this)
+            //  this Node is somewhere in the middle of the recently-written list
+            ptrToUpdate->orderPrev->orderNext = ptrToUpdate->orderNext;
+            ptrToUpdate->orderNext->orderPrev = ptrToUpdate->orderPrev;
+        } else {
+            // this Node is the first one (least recent one)
+            m_leastRecent = ptrToUpdate->orderNext;
+            m_leastRecent->orderPrev = nullptr;
+        }
+        
+        ptrToUpdate->orderPrev = m_mostRecent;
+        m_mostRecent = ptrToUpdate;
+    }
+}
 
 
 #endif
