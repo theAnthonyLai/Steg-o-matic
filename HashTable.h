@@ -157,6 +157,41 @@ bool HashTable<KeyType, ValueType>::touch(const KeyType& key)
     return true;
 }
 
+template <typename KeyType, typename ValueType>
+bool HashTable<KeyType, ValueType>::discard(KeyType& key, ValueType& value)
+{
+    if (m_leastRecent == nullptr)
+        //  none of the Node is non-permanent
+        return false;
+    Node* ptrToDelete = m_leastRecent;
+    key = ptrToDelete->key;
+    value = ptrToDelete->value;
+    
+    //  update recently-written list
+    if (ptrToDelete->orderNext == nullptr) {
+        //  this is the only non-permanent Node
+        m_leastRecent = m_mostRecent = nullptr;
+    } else {
+        //  there is/are other non-permanent Node(s)
+        m_leastRecent = ptrToDelete->orderNext;
+        m_leastRecent->orderPrev = nullptr;
+    }
+    
+    //  update linked list in the bucket
+    if (ptrToDelete->next == nullptr) {
+        //  last Node in the linked list
+        ptrToDelete->prev->next = nullptr;
+    } else {
+        ptrToDelete->prev->next = ptrToDelete->next;
+        ptrToDelete->next->prev = ptrToDelete->prev;    //  there's always a Node before (perhaps dummy)
+    }
+    
+    //  delete Node
+    delete ptrToDelete;
+    m_nUsed--;
+    return true;
+}
+
 //  private member/helper function
 template <typename KeyType, typename ValueType>
 unsigned int HashTable<KeyType, ValueType>::getBucketNum(const KeyType& key) const
