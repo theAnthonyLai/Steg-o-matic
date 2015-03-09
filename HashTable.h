@@ -30,15 +30,20 @@ private:
     struct Node {
         KeyType key;
         ValueType value;
+        Node* prev;
         Node* next;
         Node* orderPrev;
         Node* orderNext;
+        bool isPermanent;
     };
     
     //  private member functions
     unsigned int getBucketNum(const KeyType& key) const;
-    bool getNodePtr(const KeyType& key, Node*& ptr) const;
+        //  get the bucket number using computeHash and module opertator
     
+    bool getNodePtr(const KeyType& key, Node*& ptr) const;
+        //  if key is found in the HashTable, return true with ptr pointing to the Node
+        //  otherwise, return false with ptr points to the last Node in the linked list
     
     Node* m_buckets;    //  dynamically allocated array
     unsigned int m_nBuckets;
@@ -59,6 +64,16 @@ HashTable<KeyType, ValueType>::HashTable(unsigned int numBuckets, unsigned int c
     m_buckets = new Node*[numBuckets];
     m_leastRecent = nullptr;
     m_mostRecent = nullptr;
+    
+    //  create a dummy Node in each bucket
+    for (int i = 0; i < numBuckets; i++) {
+        m_buckets[i] = new Node;
+        m_buckets[i]->prev = nullptr;
+        m_buckets[i]->next = nullptr;
+        m_buckets[i]->orderPrev = nullptr;
+        m_buckets[i]->orderNext = nullptr;
+        m_buckets[i]->isPermanent = true;
+    }
 }
 
 //  TO_DO destructor here
@@ -73,10 +88,63 @@ template <typename KeyType, typename ValueType>
 bool HashTable<KeyType, ValueType>::set(const KeyType& key, const ValueType& value, bool permanent)
 {
     Node* keyPtr;
-    if (!getNodePtr(key, keyPtr) && isFull())
+    bool doesNodeExist = getNodePtr(key, keyPtr);
+    if (!doesNodeExist && isFull())
+        //  key not in the HashTable and HashTable is full
         return false;
     
-    
+    if (!doesNodeExist) {
+        //  key not in the HashTable and keyPtr points to the last Node in the linked list
+        Node* newlyAdded = new Node;
+        keyPtr->next = newlyAdded;
+        newlyAdded->prev = keyPtr;
+        newlyAdded->next = nullptr;
+        newlyAdded->key = key;
+        newlyAdded->value = value;
+        m_nUsed++;
+        
+        if (!permanent) {
+            newlyAdded->isPermanent = false;
+            if (m_leastRecent == nullptr) {
+                //  first Node to track (first non-permanent)
+                m_leastRecent = m_mostRecent = newlyAdded;
+                newlyAdded->orderPrev = newlyAdded->orderNext = nullptr;
+            } else {
+                m_mostRecent->orderNext = newlyAdded;
+                newlyAdded->orderPrev = m_mostRecent;
+                newlyAdded->orderNext = nullptr;
+                m_mostRecent = newlyAdded;
+            }
+        } else {
+            newlyAdded->isPermanent = true;
+        }
+    } else {
+        //  key already in the table
+        keyPtr->value = value;
+        if (!keyPtr->isPermanent) {
+            //  not permanent, must be moved to the most recently-written list
+            if (m_mostRecent != keyPtr) {
+                //  more that one non-permanent Node in the recenlty-written list
+                //  and this Node is not already the most recent one
+                m_mostRecent->orderNext = keyPtr;
+                
+                if (keyPtr->orderPrev != nullptr) {
+                    //  && keyPtr->orderNext != nullptr (should not need to check this)
+                    //  this Node is somewhere in the middle of the recently-written list
+                    keyPtr->orderPrev->orderNext = keyPtr->orderNext;
+                    keyPtr->orderNext->orderPrev = keyPtr->orderPrev;
+                } else {
+                    // this Node is the first one (least recent one)
+                    m_leastRecent = keyPtr->orderNext;
+                    m_leastRecent->orderPrev = nullptr;
+                }
+                
+                keyPtr->orderPrev = m_mostRecent;
+                m_mostRecent = keyPtr;
+            }
+        }
+    }
+    return true;
 }
 
 //  private member/helper function
@@ -94,13 +162,16 @@ bool HashTable<KeyType, ValueType>::getNodePtr(const KeyType& key, Node*& ptr) c
 {
     unsigned int keyBucketNum = getBucketNum(key);
     ptr = m_buckets[keyBucketNum];
-    while (ptr != nullptr) {
-        if (ptr->key == key)
+    for (;;) {  //  don't need to check in the first step because there are dummy Nodes
+        if (ptr->key == key && ptr->prev != nullptr)
+            //  the second condition confirms that this is not the dummy Node
             return true;
-        ptr = ptr->next;
+        if (ptr->next == nullptr)
+            //  this is the end of the linked list
+            return false;
+        else
+            ptr = ptr->next;
     }
-    //  not found
-    return false;
 }
 
 
