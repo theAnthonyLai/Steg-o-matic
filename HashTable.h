@@ -79,6 +79,18 @@ HashTable<KeyType, ValueType>::HashTable(unsigned int numBuckets, unsigned int c
 }
 
 //  TO_DO destructor here
+template <typename KeyType, typename ValueType>
+HashTable<KeyType, ValueType>::~HashTable()
+{
+    for (int i = 0; i < m_nBuckets; i++) {
+        Node* ptrToDelete, ptr = m_buckets[i];
+        while (ptr != nullptr) {
+            ptrToDelete = ptr;
+            ptr = ptr->next;
+            delete ptrToDelete;
+        }
+    }
+}
 
 template <typename KeyType, typename ValueType>
 bool HashTable<KeyType, ValueType>::isFull() const
