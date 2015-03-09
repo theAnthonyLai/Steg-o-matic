@@ -147,6 +147,20 @@ bool HashTable<KeyType, ValueType>::set(const KeyType& key, const ValueType& val
     return true;
 }
 
+template <typename KeyType, typename ValueType>
+bool HashTable<KeyType, ValueType>::get(const KeyType& key, ValueType& value) const
+{
+    Node* keyPtr;
+    if (!getNodePtr(key, keyPtr))
+        //  key not in the HashTable
+        return false;
+    else {
+        value = keyPtr->value;
+        return true;
+    }
+}
+
+
 //  private member/helper function
 template <typename KeyType, typename ValueType>
 unsigned int HashTable<KeyType, ValueType>::getBucketNum(const KeyType& key) const
