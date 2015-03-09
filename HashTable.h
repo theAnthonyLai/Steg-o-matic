@@ -47,7 +47,7 @@ private:
     
     void updateRecentList(Node* ptrToUpdate);
     
-    Node* m_buckets;    //  dynamically allocated array
+    Node** m_buckets;    //  dynamically allocated array
     unsigned int m_nBuckets;
     unsigned int m_nCapacity;
     unsigned int m_nUsed;
@@ -57,7 +57,7 @@ private:
 };
 
 //  TO_DO implement/move this to cpp
-unsigned int computeHash(std::string key);
+//unsigned int computeHash(std::string key);
 
 template <typename KeyType, typename ValueType>
 HashTable<KeyType, ValueType>::HashTable(unsigned int numBuckets, unsigned int capacity)
@@ -83,7 +83,8 @@ template <typename KeyType, typename ValueType>
 HashTable<KeyType, ValueType>::~HashTable()
 {
     for (int i = 0; i < m_nBuckets; i++) {
-        Node* ptrToDelete, ptr = m_buckets[i];
+        Node* ptrToDelete;
+        Node* ptr = m_buckets[i];
         while (ptr != nullptr) {
             ptrToDelete = ptr;
             ptr = ptr->next;
@@ -210,7 +211,7 @@ unsigned int HashTable<KeyType, ValueType>::getBucketNum(const KeyType& key) con
 {
     unsigned int computeHash(KeyType);  //  prototype
     unsigned int hashNum = computeHash(key);
-    unsigned int bucketNum = hashNum % m_buckets;
+    unsigned int bucketNum = hashNum % m_nBuckets;
     return bucketNum;
 }
 
@@ -250,6 +251,7 @@ void HashTable<KeyType, ValueType>::updateRecentList(Node* ptrToUpdate) {
         }
         
         ptrToUpdate->orderPrev = m_mostRecent;
+        ptrToUpdate->orderNext = nullptr;
         m_mostRecent = ptrToUpdate;
     }
 }
