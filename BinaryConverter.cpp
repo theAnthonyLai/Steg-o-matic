@@ -49,7 +49,7 @@ bool BinaryConverter::decode(const string& bitString, vector<unsigned short>& nu
     int nNum = binaryString.size() / 16;
     unsigned short convertedNumber;
     for (int i = 0; i < nNum; i++) {
-        if (!convertBitStringToNumber(binaryString.substr((i+i*16),16), convertedNumber))
+        if (!convertBitStringToNumber(binaryString.substr((i*16),16), convertedNumber))
             return false;
         numbers.push_back(convertedNumber);
     }
