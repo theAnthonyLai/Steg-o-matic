@@ -10,13 +10,51 @@ bool convertBitStringToNumber(string bitString, unsigned short& number);
 
 string BinaryConverter::encode(const vector<unsigned short>& numbers)
 {
-	return "";  // This compiles, but may not be correct
+	string bitString = "";
+    string encodedString = "";
+    for (int i = 0; i < numbers.size(); i++) {
+        bitString = convertNumberToBitString(numbers[i]);
+        
+        //  compute from binary to spaces and tabs
+        for (int j = 0; j < bitString.size(); j++) {
+            if (bitString[j] == '0')
+                encodedString += ' ';
+            else
+                encodedString += '\t';
+        }
+                                                     
+    }
+    return encodedString;
 }
 
-bool BinaryConverter::decode(const string& bitString,
-							 vector<unsigned short>& numbers)
+bool BinaryConverter::decode(const string& bitString, vector<unsigned short>& numbers)
 {
-	return false;  // This compiles, but may not be correct
+	if (bitString.size() % 16 != 0)
+        return false;
+    
+    //  convert tabs and spaces to 1s and 0s
+    //  return false if contain none-space and none-tab char
+    string binaryString = "";
+    for (int i = 0; i < bitString.size(); i++){
+        if (bitString[i] == ' ')
+            binaryString += '0';
+        else if (bitString[i] == '\t')
+            binaryString += '1';
+        else
+            return false;
+    }
+    
+    //  convert binary to digital
+    numbers.clear();
+    int nNum = binaryString.size() / 16;
+    unsigned short convertedNumber;
+    for (int i = 0; i < nNum; i++) {
+        if (!convertBitStringToNumber(binaryString.substr((i+i*16),16), convertedNumber))
+            return false;
+        numbers.push_back(convertedNumber);
+    }
+    
+    return true;
 }
 
 string convertNumberToBitString(unsigned short number)
