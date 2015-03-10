@@ -1,13 +1,59 @@
 // We have not yet produced the test driver main routine for you.
-
-
 #include <iostream>
 #include <cassert>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "provided.h"
 #include "HashTable.h"
 using namespace std;
+
+void HashTest();
+void HashTest2();
+void BinaryTest();
+
+int main()
+{
+	cout << "Test driver not yet written." << endl;
+
+	// string text;
+	// if ( ! WebSteg::hideMessageInPage("http://cs.ucla.edu", "Hello there!", text))
+	//	cout << "Error hiding!" << endl;
+	// string msg;
+	// if ( ! WebSteg::revealMessageInPage("http://cs.ucla.edu", msg))
+	// 	cout << "Error revealing!" << endl;
+    
+    //  HashTest();
+    //  HashTest2();
+    BinaryTest();
+    cerr << "Passed all tests!!" << endl;
+}
+
+void BinaryTest() {
+    vector<unsigned short> v1, v2;
+    v1.push_back(19);
+    assert(BinaryConverter::encode(v1) == "           \t  \t\t");
+    assert(BinaryConverter::decode(BinaryConverter::encode(v1), v2) && v2[0] == 19);
+    v1.clear();
+    v2.clear();
+    assert(BinaryConverter::encode(v1) == "");
+    assert(BinaryConverter::decode("", v1) && v1.size() == 0);
+    unsigned short array[9] = { 17, 25, 24, 99, 123, 45, 222, 98, 77 };
+    for (int i = 0; i < 9; i++)
+        v1.push_back(array[i]);
+    //  stuff v2 with random stuff, make sure decode clears them
+    for (int i = 8; i >= 0; i--)
+        v2.push_back(array[i]);
+    v2.push_back(111);
+    assert(BinaryConverter::decode(BinaryConverter::encode(v1), v2) && v2.size() == 9);
+    for (int i = 0; i < 9; i++)
+        assert(array[i] == v2[i]);
+    //  test non-16 multiple and non space/tab
+    assert(!BinaryConverter::decode("   ", v1));
+    assert(BinaryConverter::decode("                ", v1));
+    assert(!BinaryConverter::decode("               t", v1));
+
+}
 
 unsigned int computeHash(int key) {
     return key;
@@ -20,24 +66,7 @@ unsigned int computeHash(std::string key) {
     return result;
 }
 
-void test();
-void test2();
-int main()
-{
-	cout << "Test driver not yet written." << endl;
-
-	// string text;
-	// if ( ! WebSteg::hideMessageInPage("http://cs.ucla.edu", "Hello there!", text))
-	//	cout << "Error hiding!" << endl;
-	// string msg;
-	// if ( ! WebSteg::revealMessageInPage("http://cs.ucla.edu", msg))
-	// 	cout << "Error revealing!" << endl;
-    
-    test();
-    test2();
-}
-
-void test() {
+void HashTest() {
     HashTable<string, int> nameToAge(11, 200);
     // add a bunch of associations in this order
     nameToAge.set("Carey", 43);
@@ -88,7 +117,7 @@ unsigned int computeHash(int* a)
     return 1;
 }
 
-void test2()
+void HashTest2()
 {
 
     HashTable<int*, int> aaa(5, 5);
