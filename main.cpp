@@ -12,6 +12,7 @@ void HashTest();
 void HashTest2();
 void BinaryTest();
 void CompressorTest();
+void StegTest();
 
 int main()
 {
@@ -27,8 +28,86 @@ int main()
     //  HashTest();
     //  HashTest2();
     //  BinaryTest();
-    CompressorTest();
+    //  CompressorTest();
+    StegTest();
     cerr << "Passed all tests!!" << endl;
+}
+
+void StegTest() {
+    string m1 = "This f*cking works!!";   //  message
+    vector<unsigned short> v1;
+    string h1 = "<html>   \nQ \tQQ \t \nBBB\t\t\t   \t\tGG \nBBB \n\t\nDDD\nEEE </html>   ";    //  html
+    string o1 = "dummy stuff";  //  output
+    string r1 = "dum";  //  result
+    assert(Steg::hide(h1, m1, o1));
+    assert(Steg::reveal(o1, r1) && r1 == m1);
+    
+    string m2 = "A";
+    vector<unsigned short> v2;
+    string h2 = "<p>\r\n";
+    string o2 = "";
+    string r2 = "";
+    assert(Steg::hide(h2, m2, o2));
+    assert(Steg::reveal(o2, r2) && r2 == m2);
+    
+    string m3 = "I'm so tire...";
+    vector<unsigned short> v3;
+    string h3 = "";
+    string o3 = "F*ck this shit";
+    string r3 = "That girl is cute";
+    assert(!Steg::hide(h3, o3, r3) && r3 == "That girl is cute");
+    assert(Steg::hide(h1, r3, h3));
+    assert(Steg::reveal(h3, r3) && r3 == "That girl is cute");
+}
+
+
+void StegTest2() {
+//    string o1 = "<html>   \nQ \tQQ \t \nBBB\t\t\t   \t\tGG \nBBB \n\t\nDDD\nEEE </html>   ";
+//    string a = "    \t \t\t\t \t      \t\t \t \t  \t\t\t \t\t ";
+//    vector<unsigned short> a1;
+//    BinaryConverter::decode(a, a1);
+//    cout << a1[1] << a1[2] << endl;
+//    string a2;
+//    Compressor::decompress(a1, a2);
+//    cout << a2 << endl;
+    string o1 = "This is a test";
+    string o2 = "AB";
+    string o3 = "A";
+    vector<unsigned short> v1;
+    vector<unsigned short> v2;
+    v2.push_back(65);
+    v2.push_back(66);
+    string h1 = "<html>   \nQ \tQQ \t \nBBB\t\t\t   \t\tGG \nBBB \n\t\nDDD\nEEE </html>   ";
+    string h2 = "<p>  \t\t\r\n<div>C C\t\t \t\n";
+    string h3 = "<p>\r\n";
+    string s2 = BinaryConverter::encode(v2);
+    string c2 = "<p>" + s2.substr(0, 16) + "<div>C C" + s2.substr(16);
+    string r2 = "";
+    string r3 = "";
+    assert(Steg::hide(h2, o2, r2));// && r2.substr(0, r2.size()-16) == c2);
+    r2 = r2.substr(0, r2.size()-16);
+    //assert(r2 == c2);
+    
+    
+    vector<unsigned short> v3;
+    v3.push_back(65);
+    string s3 = BinaryConverter::encode(v3);
+    string c3 = "<p>" + s3;// + "\n";
+    //cout << s3 << endl;
+    assert(Steg::hide(h3, o3, r3));// && r3 == c3);
+    r3 = r3.substr(0, 17);
+    assert(r3 == c3);
+    
+    string h5 = "";
+    string m1 = "";
+    //assert(!Steg::hide(h2, o1, h2));
+    //assert(Steg::hide(h1, o1, h2));
+    //assert(Steg::hide(h4, o3, h2) && h2 == r3);
+    //assert(Steg::hide(h3, o2, h2) && h2 == r2);
+    //assert(Steg::reveal(h2, m1));// && m1 == o1);
+    //assert(Steg::hide(h4, o3, h2));
+    //assert(Steg::reveal(h2, h5) && h5 == o3);
+    
 }
 
 void CompressorTest() {
