@@ -193,17 +193,17 @@ void BinaryTest() {
 unsigned int computeHash(int key) {
     return key;
 }
-
-unsigned int computeHash(unsigned short key) {
-    return key;
-}
-
-unsigned int computeHash(std::string key) {
-    int result = 0;
-    for (int i = 0; i < key.size(); i++)
-        result += (i+1)*key[i];
-    return result;
-}
+//
+//unsigned int computeHash(unsigned short key) {
+//    return key;
+//}
+//
+//unsigned int computeHash(std::string key) {
+//    int result = 0;
+//    for (int i = 0; i < key.size(); i++)
+//        result += (i+1)*key[i];
+//    return result;
+//}
 
 unsigned int computeHash(int* a)
 {
