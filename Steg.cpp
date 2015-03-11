@@ -16,12 +16,15 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     
     //  compute the number of lines in hostIn
     int nLines = 0;
+    string copiedHostIn = hostIn;
     for (int i = 0; i < hostIn.size(); i++)
         if (hostIn[i] == '\n')
             nLines++;
-    if (hostIn[hostIn.size() - 1] != '\n')
+    if (hostIn[hostIn.size() - 1] != '\n') {
         //  hostIn does not end with new line char
         nLines++;
+        copiedHostIn += "\n";
+    }
     
     //encodedMsg = "         	     	";
     int nLinesToHaveExtra = encodedMsg.size() % nLines;
@@ -33,10 +36,10 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     string encodedToAppend;
     string whiteSpace = " \t";
     int lineStart = 0;
-    for (int i = 0; i < hostIn.size(); i++) {
-        if (hostIn[i] == '\n') {
+    for (int i = 0; i < copiedHostIn.size(); i++) {
+        if (copiedHostIn[i] == '\n') {
             //  prepare the substring of original stuff from hostIn
-            thisLine = hostIn.substr(lineStart, i - lineStart);
+            thisLine = copiedHostIn.substr(lineStart, i - lineStart);
             lineStart = i + 1;
             //  VAGUE what if there are more than one \r?
             if (thisLine[thisLine.size()-1] == '\r')
@@ -67,17 +70,21 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
 
 bool Steg::reveal(const string& host, string& msg)
 {
+    string copiedHost = host;
+    if (host[host.size() - 1] != '\n')
+        copiedHost += "\n";
+    
     bool isHostValid = true;
     string encodedMsg = "";
     string thisLine = "";
-    string whiteSpace = " \t\r";
+    string whiteSpace = " \t";
     int lineStart = 0;
-    for (int i = 0; i < host.size(); i++) {
-        if (host[i] == '\n') {
+    for (int i = 0; i < copiedHost.size(); i++) {
+        if (copiedHost[i] == '\n') {
             //  get the substring of original encodedMsg from host
-            thisLine = host.substr(lineStart, i - lineStart);
+            thisLine = copiedHost.substr(lineStart, i - lineStart);
             lineStart = i + 1;
-            int toCut = thisLine.find_last_of(whiteSpace);
+            int toCut = thisLine.find_last_not_of(whiteSpace);
             if (toCut < 0) {
                 //  VAGUE should break immeadiately?
                 //  b/c if using hide, every line after this should not end with any space or tab
@@ -87,7 +94,7 @@ bool Steg::reveal(const string& host, string& msg)
                 //  there is line before this that does not end with spaces or tabs
                 //  but this line end with spaces and/or tabs
                 return false;
-            thisLine.substr(toCut); //  get everythign from this pos to the end
+            thisLine = thisLine.substr(toCut + 1); //  get everythign from this pos to the end
             
             //  append the substring of original encodedMsg
             encodedMsg += thisLine;
