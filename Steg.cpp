@@ -1,7 +1,6 @@
 #include "provided.h"
 #include <string>
 #include <vector>
-#include <iostream>
 using namespace std;
 
 bool Steg::hide(const string& hostIn, const string& msg, string& hostOut) 
@@ -11,7 +10,6 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     
     vector<unsigned short> msgNum;
     Compressor::compress(msg, msgNum);
-    //cout << msgNum[0] << msgNum[1] << endl;
     string encodedMsg = BinaryConverter::encode(msgNum);
     
     //  compute the number of lines in hostIn
@@ -47,7 +45,6 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
                 thisLine.pop_back();
             int toCut = thisLine.find_last_not_of(whiteSpace);
             thisLine.erase(toCut + 1);
-            cout << thisLine << endl;
             
             //  prepare the substring of encodedMsg to append
             if (nLinesToHaveExtra > 0) {
@@ -74,7 +71,6 @@ bool Steg::reveal(const string& host, string& msg)
     if (host[host.size() - 1] != '\n')
         copiedHost += "\n";
     
-    bool isHostValid = true;
     string encodedMsg = "";
     string thisLine = "";
     string whiteSpace = " \t";
@@ -84,16 +80,10 @@ bool Steg::reveal(const string& host, string& msg)
             //  get the substring of original encodedMsg from host
             thisLine = copiedHost.substr(lineStart, i - lineStart);
             lineStart = i + 1;
+            if (thisLine[thisLine.size() - 1] == '\r')
+                thisLine.pop_back();
             int toCut = thisLine.find_last_not_of(whiteSpace);
-            if (toCut < 0) {
-                //  VAGUE should break immeadiately?
-                //  b/c if using hide, every line after this should not end with any space or tab
-                isHostValid = false;
-                continue;
-            } else if (!isHostValid)
-                //  there is line before this that does not end with spaces or tabs
-                //  but this line end with spaces and/or tabs
-                return false;
+            //  ADD stuff here to check if valid
             thisLine = thisLine.substr(toCut + 1); //  get everythign from this pos to the end
             
             //  append the substring of original encodedMsg
