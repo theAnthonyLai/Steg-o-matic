@@ -1,6 +1,7 @@
 #include "provided.h"
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 bool Steg::hide(const string& hostIn, const string& msg, string& hostOut) 
@@ -10,6 +11,7 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     
     vector<unsigned short> msgNum;
     Compressor::compress(msg, msgNum);
+    //cout << msgNum[0] << msgNum[1] << endl;
     string encodedMsg = BinaryConverter::encode(msgNum);
     
     //  compute the number of lines in hostIn
@@ -21,6 +23,7 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
         //  hostIn does not end with new line char
         nLines++;
     
+    //encodedMsg = "         	     	";
     int nLinesToHaveExtra = encodedMsg.size() % nLines;
     int nCharInExtra = encodedMsg.size() / nLines + 1;
     int cutStartPos = 0;    //  position to start cutting the encodedMsg
@@ -28,15 +31,20 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     hostOut = "";
     string thisLine = "";
     string encodedToAppend;
-    string whiteSpace = " \t\r";
+    string whiteSpace = " \t";
     int lineStart = 0;
     for (int i = 0; i < hostIn.size(); i++) {
         if (hostIn[i] == '\n') {
             //  prepare the substring of original stuff from hostIn
             thisLine = hostIn.substr(lineStart, i - lineStart);
+            lineStart = i + 1;
             //  VAGUE what if there are more than one \r?
+            if (thisLine[thisLine.size()-1] == '\r')
+                //  delete the last character if it is '\r'
+                thisLine.pop_back();
             int toCut = thisLine.find_last_not_of(whiteSpace);
             thisLine.erase(toCut + 1);
+            cout << thisLine << endl;
             
             //  prepare the substring of encodedMsg to append
             if (nLinesToHaveExtra > 0) {
@@ -50,8 +58,8 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
             
             //  append the original stuff and encoded stuff to result
             hostOut += thisLine;
-            hostOut += "\n";
             hostOut += encodedToAppend;
+            hostOut += "\n";
         }
     }
     return true;
@@ -68,6 +76,7 @@ bool Steg::reveal(const string& host, string& msg)
         if (host[i] == '\n') {
             //  get the substring of original encodedMsg from host
             thisLine = host.substr(lineStart, i - lineStart);
+            lineStart = i + 1;
             int toCut = thisLine.find_last_of(whiteSpace);
             if (toCut < 0) {
                 //  VAGUE should break immeadiately?
@@ -85,6 +94,7 @@ bool Steg::reveal(const string& host, string& msg)
         }
     }
     
+    msg = "";
     vector<unsigned short> msgNum;
     if (!BinaryConverter::decode(encodedMsg, msgNum))
         return false;
