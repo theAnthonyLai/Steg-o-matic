@@ -16,6 +16,15 @@ void CompressorTest();
 void StegTest();
 void WebStegTest();
 
+//unsigned int computeHash(int key) {
+//    return key;
+//}
+
+//unsigned int computeHash(int* a)
+//{
+//    return 1;
+//}
+
 int main()
 {
 	cout << "Test driver not yet written." << endl;
@@ -27,11 +36,11 @@ int main()
 	// if ( ! WebSteg::revealMessageInPage("http://cs.ucla.edu", msg))
 	// 	cout << "Error revealing!" << endl;
     
-    HashTest();
-    HashTest2();
-    BinaryTest();
-    CompressorTest();
-    StegTest();
+//    HashTest();
+//    HashTest2();
+//    BinaryTest();
+//    CompressorTest();
+//    StegTest();
     WebStegTest();
     
     cerr << "Passed all tests!!" << endl;
@@ -69,7 +78,7 @@ void WebStegTest() {
     assert(msg == plan);
     cerr << "Recovered text is what was hidden:\n" << msg;
 }
-
+/*
 void StegTest() {
     string m1 = "This f*cking works!!";   //  message
     vector<unsigned short> v1;
@@ -188,26 +197,6 @@ void BinaryTest() {
     assert(BinaryConverter::decode("                ", v1));
     assert(!BinaryConverter::decode("               t", v1));
 
-}
-
-unsigned int computeHash(int key) {
-    return key;
-}
-//
-//unsigned int computeHash(unsigned short key) {
-//    return key;
-//}
-//
-//unsigned int computeHash(std::string key) {
-//    int result = 0;
-//    for (int i = 0; i < key.size(); i++)
-//        result += (i+1)*key[i];
-//    return result;
-//}
-
-unsigned int computeHash(int* a)
-{
-    return 1;
 }
 
 void HashTest() {
@@ -338,4 +327,4 @@ void HashTest2()
     int b;
     assert(nameToAge.discard(a, b) && a == "Ivan" && b == 28);
     assert(nameToAge.discard(a, b) && a == "Sally" && b == 22);
-}
+}*/
