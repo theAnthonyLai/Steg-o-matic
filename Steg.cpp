@@ -34,6 +34,7 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
         if (hostIn[i] == '\n') {
             //  prepare the substring of original stuff from hostIn
             thisLine = hostIn.substr(lineStart, i - lineStart);
+            //  VAGUE what if there are more than one \r?
             int toCut = thisLine.find_last_not_of(whiteSpace);
             thisLine.erase(toCut + 1);
             
@@ -56,7 +57,39 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
     return true;
 }
 
-bool Steg::reveal(const string& hostIn, string& msg) 
+bool Steg::reveal(const string& host, string& msg)
 {
-	return false;  // This compiles, but may not be correct
+    bool isHostValid = true;
+    string encodedMsg = "";
+    string thisLine = "";
+    string whiteSpace = " \t\r";
+    int lineStart = 0;
+    for (int i = 0; i < host.size(); i++) {
+        if (host[i] == '\n') {
+            //  get the substring of original encodedMsg from host
+            thisLine = host.substr(lineStart, i - lineStart);
+            int toCut = thisLine.find_last_of(whiteSpace);
+            if (toCut < 0) {
+                //  VAGUE should break immeadiately?
+                //  b/c if using hide, every line after this should not end with any space or tab
+                isHostValid = false;
+                continue;
+            } else if (!isHostValid)
+                //  there is line before this that does not end with spaces or tabs
+                //  but this line end with spaces and/or tabs
+                return false;
+            thisLine.substr(toCut); //  get everythign from this pos to the end
+            
+            //  append the substring of original encodedMsg
+            encodedMsg += thisLine;
+        }
+    }
+    
+    vector<unsigned short> msgNum;
+    if (!BinaryConverter::decode(encodedMsg, msgNum))
+        return false;
+    if (!Compressor::decompress(msgNum, msg))
+        return false;
+    
+    return true;
 }
