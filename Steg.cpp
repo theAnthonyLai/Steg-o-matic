@@ -49,6 +49,7 @@ bool Steg::hide(const string& hostIn, const string& msg, string& hostOut)
             
             //  append the original stuff and encoded stuff to result
             hostOut += thisLine;
+            hostOut += "\n";
             hostOut += encodedToAppend;
         }
     }
