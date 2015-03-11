@@ -11,6 +11,7 @@ using namespace std;
 void HashTest();
 void HashTest2();
 void BinaryTest();
+void CompressorTest();
 
 int main()
 {
@@ -25,8 +26,26 @@ int main()
     
     //  HashTest();
     //  HashTest2();
-    BinaryTest();
+    //  BinaryTest();
+    CompressorTest();
     cerr << "Passed all tests!!" << endl;
+}
+
+void CompressorTest() {
+    vector<unsigned short> v1, v2;
+    v1.push_back(999);
+    string s1 = "dummy";
+    Compressor::compress("AAAAAAAAAB", v1);
+    assert(v1.size() == 8 && v1[0] == 65 && v1[2] == 256 && v1[4] == 257 && v1[5] == 65 && v1[7] == 517);
+    assert(Compressor::decompress(v1, s1) && s1 == "AAAAAAAAAB");
+    assert(!Compressor::decompress(v2, s1));
+    v1.clear();
+    v2.clear();
+    s1 = "Dummy stuff";
+    v1.push_back(777);
+    assert(Compressor::decompress(v1, s1) && s1 == "");
+    Compressor::compress("Lionel Messi is the best player in the world!!!", v1);
+    assert(Compressor::decompress(v1, s1) && s1 == "Lionel Messi is the best player in the world!!!");
 }
 
 void BinaryTest() {
@@ -59,11 +78,20 @@ unsigned int computeHash(int key) {
     return key;
 }
 
+unsigned int computeHash(unsigned short key) {
+    return key;
+}
+
 unsigned int computeHash(std::string key) {
     int result = 0;
     for (int i = 0; i < key.size(); i++)
         result += (i+1)*key[i];
     return result;
+}
+
+unsigned int computeHash(int* a)
+{
+    return 1;
 }
 
 void HashTest() {
@@ -110,11 +138,6 @@ void HashTest() {
     assert(test1.discard(key, value) && key == "JPP" && value == 66);
     assert(!test1.discard(key, value) && key == "JPP" && value == 66);
     
-}
-
-unsigned int computeHash(int* a)
-{
-    return 1;
 }
 
 void HashTest2()
