@@ -235,7 +235,7 @@ bool HashTable<KeyType, ValueType>::getNodePtr(const KeyType& key, Node*& ptr) c
 template <typename KeyType, typename ValueType>
 void HashTable<KeyType, ValueType>::updateRecentList(Node* ptrToUpdate) {
     if (m_mostRecent != ptrToUpdate) {
-        //  more that one non-permanent Node in the recenlty-written list
+        //  more than one non-permanent Node in the recenlty-written list
         //  and this Node is not already the most recent one
         m_mostRecent->orderNext = ptrToUpdate;
         
